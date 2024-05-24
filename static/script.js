@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const startBtn = document.getElementById('startBtn');
     const imageContainer = document.getElementById('imageContainer');
+    const transcriptContainer = document.getElementById('transcriptContainer');
 
     // Function to show loading spinner
     const showLoading = () => {
@@ -14,7 +15,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Function to display generated image
     const displayImage = (imageData) => {
-        imageContainer.innerHTML = `<img src="data:image/png;base64, ${imageData}" alt="Generated Image">`;
+        imageContainer.innerHTML = `<img src="data:image/png;base64,${imageData}" alt="Generated Image">`;
+    };
+
+    // Function to display recognized text
+    const displayTranscript = (transcript) => {
+        transcriptContainer.textContent = `Recognized Text: ${transcript}`;
     };
 
     // Event listener for the start button
@@ -26,6 +32,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const recognition = new window.webkitSpeechRecognition(); // Create a new SpeechRecognition object
             recognition.lang = 'en-US'; // Set the language for speech recognition
 
+            // Event listener for live transcription
+            recognition.onstart = () => {
+                transcriptContainer.textContent = 'Listening...';
+            };
+
             // Start speech recognition
             recognition.start();
 
@@ -33,6 +44,8 @@ document.addEventListener('DOMContentLoaded', () => {
             recognition.onresult = (event) => {
                 const transcript = event.results[0][0].transcript; // Get the recognized speech transcript
                 console.log('Transcript:', transcript);
+
+                displayTranscript(transcript); // Display the recognized text
 
                 // Send the transcript to the backend for image generation
                 fetch('/generate-image', {
